@@ -1,0 +1,80 @@
+{
+  "name": "g_battle",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "rm -f ./g_battle.js\nrmpm .\nmv -f ./g_battle.js ../js/plugins/g_battle.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "params": [
+    {
+      "name": "Actor Color",
+      "description": "The background color of actor in battle scene.",
+      "default": "0x3366ff",
+      "type": "string"
+    }
+  ],
+  "commands": [
+    {
+      "name": "addState",
+      "text": "Add State",
+      "description": "Guard skill",
+      "args": [
+        {
+          "name": "stateId",
+          "text": "State ID",
+          "description": "The state ID.",
+          "type": "number",
+          "default": "1"
+        },
+        {
+          "name": "stacks",
+          "text": "Stacks",
+          "description": "Amount of stacks.",
+          "type": "number",
+          "default": "1"
+        }
+      ]
+    }, 
+    {
+      "name": "taunt",
+      "text": "Taunt",
+      "description": "Make target attack the actor."
+    },
+    {
+      "name": "interrupt",
+      "text": "Interrupt",
+      "description": "Interrupt a action.",
+      "args": [
+        {
+          "name": "successRate",
+          "type": "number",
+          "default": "0.5"
+        },
+        {
+          "name": "successMsg",
+          "text": "Success Message",
+          "type": "string"
+        },
+        {
+          "name": "failMsg",
+          "text": "Fail Message",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@tweenjs/tween.js": "^18.6.4",
+    "events": "^3.3.0",
+    "js-yaml": "^4.1.0",
+    "rm-rich": "^1.0.6",
+    "rmmz": "https://github.com/gsioteam/Rpg-Maker-MZ-Typescript.git#707d157be21565dd6e853755eae59ebe4aed5b02",
+    "tinycolor2": "^1.4.2"
+  },
+  "devDependencies": {
+    "rmpm": "^1.0.9"
+  }
+}

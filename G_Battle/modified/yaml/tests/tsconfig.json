@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "declaration": false,
+    "paths": {
+      "yaml": ["../src/index.ts"]
+    },
+    "rootDir": ".."
+  },
+  "include": ["**/*.ts", "**/doc/*.js"]
+}

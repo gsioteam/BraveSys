@@ -1,0 +1,7 @@
+[
+null,
+{"id":1,"list":[{"code":357,"indent":0,"parameters":["g_battle","addState","Add State",{"stateId":"2","stacks":"10"}]},{"code":657,"indent":0,"parameters":["State ID = 2"]},{"code":657,"indent":0,"parameters":["Stacks = 10"]},{"code":0,"indent":0,"parameters":[]}],"name":"Battle:Guard","switchId":1,"trigger":0},
+{"id":2,"list":[{"code":0,"indent":0,"parameters":[]}],"name":"","switchId":1,"trigger":0},
+{"id":3,"list":[{"code":0,"indent":0,"parameters":[]}],"name":"","switchId":1,"trigger":0},
+{"id":4,"list":[{"code":0,"indent":0,"parameters":[]}],"name":"","switchId":1,"trigger":0}
+]
