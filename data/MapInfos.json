@@ -1,6 +1,6 @@
 [
 null,
 {"id":1,"expanded":true,"name":"MAP001","order":1,"parentId":0,"scrollX":542.5,"scrollY":383.5},
-{"id":2,"expanded":true,"name":"Mountain Village","order":2,"parentId":0,"scrollX":593.5,"scrollY":779.5},
-{"id":3,"expanded":false,"name":"House 1","order":3,"parentId":2,"scrollX":542.5,"scrollY":383.5}
+{"id":2,"expanded":true,"name":"Mountain Village","order":2,"parentId":0,"scrollX":734,"scrollY":678},
+{"id":3,"expanded":false,"name":"House 1","order":3,"parentId":2,"scrollX":723.3333333333334,"scrollY":522}
 ]
