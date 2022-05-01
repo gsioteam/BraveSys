@@ -4,7 +4,7 @@
 
 /*:
  * @target MZ
- * @plugindesc (v1.0.0) 
+ * @plugindesc (v1.0.0) 8 direction and pixel movement for RPG Maker MZ.
  */
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 
@@ -18,11 +18,30 @@ Game_CharacterBase.prototype.isMoving = function () {
     return _Game_CharacterBase_isMoving.call(this);
 }
 
+Game_Player.prototype.updateDashing = function() {
+    if (this.isMoving() && !this._movePressing) {
+        return;
+    }
+    if (this.canMove() && !this.isInVehicle() && !$gameMap.isDashDisabled()) {
+        this._dashing =
+            this.isDashButtonPressed() || $gameTemp.isDestinationValid();
+    } else {
+        this._dashing = false;
+    }
+};
+
 Game_Player.prototype.moveByInput = function() {
     if ((!this.isMoving() || this._movePressing) && this.canMove()) {
         let direction = Input.dir8;
         if (direction > 0) {
             $gameTemp.clearDestination();
+            if (!this._movePressing) {
+                this._resetCachePosition();
+                var followers = this._followers._data;
+                for (let follower of followers) {
+                    follower._resetCachePosition();
+                }
+            }
 
             this.setMovementSuccess(false);
 
@@ -74,6 +93,11 @@ Game_Player.prototype._moveByInput = function (direction) {
         return this.canPass(Math.floor(this._x + distencePerFrame), roundY + offset, 6);
     }
 
+    let walkStep = () => {
+        this.increaseSteps();
+        this.checkEventTriggerHere([1, 2]);
+    }
+
     switch (direction) {
         case 1: {
             let canLeft = leftTest(), canDown = downTest();
@@ -84,7 +108,7 @@ Game_Player.prototype._moveByInput = function (direction) {
                     this._y += dis;
                     this._x -= dis;
                     if (Math.round(this._y) > roundY || Math.round(this._x) < roundX) {
-                        this.increaseSteps();
+                        walkStep();
                     }
                     return 2;
                 } else if (this.x - roundX < roundY - this.y) {
@@ -110,7 +134,7 @@ Game_Player.prototype._moveByInput = function (direction) {
                     this._y += dis;
                     this._x += dis;
                     if (Math.round(this._y) > roundY || Math.round(this._x) > roundX) {
-                        this.increaseSteps();
+                        walkStep();
                     }
                     return 2;
                 } else if (roundX - this.x < roundY - this.y) {
@@ -136,7 +160,7 @@ Game_Player.prototype._moveByInput = function (direction) {
                     this._y -= dis;
                     this._x -= dis;
                     if (Math.round(this._y) < roundY || Math.round(this._x) < roundX) {
-                        this.increaseSteps();
+                        walkStep();
                     }
                     return 8;
                 } else if (this.x - roundX < this.y - roundY) {
@@ -162,7 +186,7 @@ Game_Player.prototype._moveByInput = function (direction) {
                     this._y -= dis;
                     this._x += dis;
                     if (Math.round(this._y) < roundY || Math.round(this._x) > roundX) {
-                        this.increaseSteps();
+                        walkStep();
                     }
                     return 8;
                 } else if (roundX - this.x < this.y - roundY) {
@@ -184,7 +208,7 @@ Game_Player.prototype._moveByInput = function (direction) {
                 this.setMovementSuccess(true);
                 this._y += this.distancePerFrame();
                 if (Math.round(this._y) > roundY) {
-                    this.increaseSteps();
+                    walkStep();
                 }
                 if (this._x > roundX && !downTest(1) ||
                     this._x < roundX && !downTest(-1)) {
@@ -199,7 +223,7 @@ Game_Player.prototype._moveByInput = function (direction) {
                 this.setMovementSuccess(true);
                 this._y -= this.distancePerFrame();
                 if (Math.round(this._y) < roundY) {
-                    this.increaseSteps();
+                    walkStep();
                 }
                 if (this._x > roundX && !upTest(1) ||
                     this._x < roundX && !upTest(-1)) {
@@ -214,7 +238,7 @@ Game_Player.prototype._moveByInput = function (direction) {
                 this.setMovementSuccess(true);
                 this._x -= this.distancePerFrame();
                 if (Math.round(this._x) < roundX) {
-                    this.increaseSteps();
+                    walkStep();
                 }
                 if (this._y > roundY && !leftTest(1) ||
                     this._y < roundY && !leftTest(-1)) {
@@ -229,7 +253,7 @@ Game_Player.prototype._moveByInput = function (direction) {
                 this.setMovementSuccess(true);
                 this._x += this.distancePerFrame();
                 if (Math.round(this._x) > roundX) {
-                    this.increaseSteps();
+                    walkStep();
                 }
                 if (this._y > roundY && !rightTest(1) ||
                     this._y < roundY && !rightTest(-1)) {
@@ -253,14 +277,18 @@ Game_Player.prototype._followersMove = function (move) {
             let last = precedingCharacter._lastPosition();
             if (last) {
                 let follower = followers[i];
-                if (last.y > follower._y) {
-                    follower.setDirection(2);
-                } else if (last.y < follower._y) {
-                    follower.setDirection(8);
-                } else if (last.x > follower._x) {
-                    follower.setDirection(6);
-                } else if (last.x < follower._x) {
-                    follower.setDirection(4);
+                if (Math.abs(last.y - follower._y) > Math.abs(last.x - follower._x)) {
+                    if (last.y > follower._y) {
+                        follower.setDirection(2);
+                    } else if (last.y < follower._y) {
+                        follower.setDirection(8);
+                    }
+                } else {
+                    if (last.x > follower._x) {
+                        follower.setDirection(6);
+                    } else if (last.x < follower._x) {
+                        follower.setDirection(4);
+                    }
                 }
                 follower._x = last.x;
                 follower._y = last.y;
@@ -280,22 +308,30 @@ Game_Player.prototype._followersMove = function (move) {
     }
 };
 
+Game_CharacterBase.prototype._resetCachePosition = function () {
+    this._posRecords = [];
+};
+
 Game_CharacterBase.prototype._recordPosition = function () {
     if (!this._posRecords) {
         this._posRecords = [];
     }
-    let last = this._lastPosition();
+    let last = this._recentPosition();
     function distance(a, b) {
+        if (!a || !b) return 0;
         let x = a.x - b.x;
         let y = a.y - b.y;
         return Math.sqrt(x * x + y * y);
     }
-    if (!last || distance(last, this) > 0.1) {
+    let dis = distance(last, this);
+    if (dis > 2) {
+        this._resetCachePosition();
+    } else if (!last || dis > 0.1) {
         this._posRecords.push({
             x: this.x, 
             y: this.y
         });
-        while (this._posRecords.length > 14) {
+        while (this._posRecords.length > 10) {
             this._posRecords.shift();
         }
     }
@@ -304,6 +340,12 @@ Game_CharacterBase.prototype._recordPosition = function () {
 Game_CharacterBase.prototype._lastPosition = function () {
     if (this._posRecords && this._posRecords.length > 0) {
         return this._posRecords[0];
+    }
+};
+
+Game_CharacterBase.prototype._recentPosition = function() {
+    if (this._posRecords && this._posRecords.length > 0) {
+        return this._posRecords[this._posRecords.length - 1];
     }
 };
 
